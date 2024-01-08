@@ -4,21 +4,45 @@ import {
   RouterProvider,
   Route,
   NavLink,
-  Link
+  Link,
+  useLocation
 } from 'react-router-dom'
 
-const Home = () =>
-  <>
+const links = [
+  { path: '/', text: 'Início' },
+  { path: '/sobre', text: 'Sobre' }
+]
+
+const Header = () => {
+  const location = useLocation()
+  const isNotHomepage = location.pathname !== '/'
+  return (
     <header>
       <nav className="nav">
         <Link to="/">
-          <img className="logo" src="logo-viajou-anotou-light.png" alt="Logo ViajouAnotou" />
+          <img className="logo" src={`/logo-viajou-anotou-${isNotHomepage ? 'dark' : 'light'}.png`} alt="Logo ViajouAnotou" />
         </Link>
         <ul>
-          <li><NavLink to="/">Início</NavLink></li>
+          {links.map(link => {
+            const linkShouldBeGray = isNotHomepage && location.pathname !== link.path
+            return (
+              <li key={link.text}>
+                <NavLink to={link.path} style={linkShouldBeGray ? { color: '#C2C2C2' } : null}>
+                  {link.text}
+                </NavLink>
+              </li>
+            )
+          }
+          )}
         </ul>
       </nav>
     </header>
+  )
+}
+
+const Home = () =>
+  <>
+    <Header />
     <main className="main-home">
       <section>
         <h1>Você viaja o mundo.<br />E o ViajouAnotou mantém suas aventuras anotadas.</h1>
@@ -28,10 +52,26 @@ const Home = () =>
     </main>
   </>
 
+const About = () =>
+  <>
+    <Header />
+    <main className="main-about">
+      <section>
+        <div>
+          <h1>Sobre o ViajouAnotou.</h1>
+          <p>O ViajouAnotou nasceu do desejo dos amigos Paulo e Roberto de compartilharem de forma rápida suas aventuras pelo mundo.</p>
+          <p>Aos poucos, esse desejo virou realidade em forma de software entre amigos e familiares. Hoje, você também pode ser parte dessa comunidade.</p>
+        </div>
+        <img src="/sobre-viajou-anotou.jpg" alt="Paulo e Roberto" />
+      </section>
+    </main>
+  </>
+
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/">
       <Route index element={<Home />} />
+      <Route path="sobre" element={<About />} />
     </Route>
   )
 )
