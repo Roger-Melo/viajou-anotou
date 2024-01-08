@@ -105,7 +105,8 @@ main {
 }
 
 .main-pricing,
-.main-about {
+.main-about,
+.main-not-found {
   background-color: white;
   color: #666;
   display: flex;
@@ -127,14 +128,16 @@ main {
 }
 
 .main-pricing h1,
-.main-about h1 {
+.main-about h1,
+.main-not-found h1 {
   font-size: 5rem;
   font-weight: 800;
   line-height: 6rem;
 }
 
 .main-pricing p,
-.main-about p {
+.main-about p,
+.main-not-found p {
   font-size: 2rem;
   font-weight: 400;
   margin: 3rem 0;
@@ -144,4 +147,13 @@ main {
 .main-about img {
   border-radius: 50px;
   width: 460px;
+}
+
+.main-not-found a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.main-not-found {
+  text-align: center;
 }
