@@ -22,6 +22,8 @@
     "eslint-plugin-react": "7.33.2",
     "eslint-plugin-react-hooks": "4.6.0",
     "eslint-plugin-react-refresh": "0.4.5",
-    "vite": "5.0.7"
+    "sharp": "0.33.1",
+    "vite": "5.0.7",
+    "vite-plugin-image-optimizer": "1.1.7"
   }
 }
