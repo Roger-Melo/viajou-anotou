@@ -26,6 +26,10 @@ body {
   background-color: var(--color-primary);
 }
 
+ul {
+  list-style: none;
+}
+
 main {
   border-radius: 20px;
 }
@@ -91,7 +95,6 @@ main {
 }
 
 .nav ul {
-  list-style: none;
   display: flex;
   align-items: center;
   gap: 4rem;
@@ -114,7 +117,7 @@ main {
 .main-not-found,
 .main-login {
   background-color: white;
-  color: #666;
+  color: var(--color-light-1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,7 +128,7 @@ main {
   display: flex;
   align-items: center;
   gap: 7rem;
-  color: var(--color-text-dark);
+  color: var(--color-dark-1);
   max-width: 75%;
 }
 
@@ -198,4 +201,160 @@ main {
 
 .form-login button:hover {
   cursor: pointer;
+}
+
+.main-app-layout {
+  display: flex;
+  padding: 0;
+  color: var(--color-light-1);
+}
+
+.sidebar {
+  display: flex;
+  flex-basis: 56rem;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  width: 50%;
+  border-radius: 20px 0 0 20px;
+  padding: 3rem 5rem;
+}
+
+.nav-app-layout {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+.nav-app-layout ul {
+  display: flex;
+  background-color: var(--color-light-2);
+  border-radius: 5px;
+}
+
+.nav-app-layout a {
+  text-decoration: none;
+  display: block;
+  color: var(--color-dark-1);
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding: 0.5rem 2rem;
+}
+
+.nav-app-layout li:first-child a.active {
+  background-color: var(--color-light-3);
+  border-radius: 5px 0 0 5px;
+}
+
+.nav-app-layout li:last-child a.active {
+  background-color: var(--color-light-3);
+  border-radius: 0 5px 5px 0;
+}
+
+.map {
+  background-color: lightskyblue;
+  width: 50%;
+  border-radius: 0 20px 20px 0;
+}
+
+.cities {
+  width: 100%;
+  height: 65vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.cities a {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  background-color: var(--color-light-2);
+  border-radius: 5px;
+  padding: 1.2rem 2rem;
+  border-left: 5px solid var(--color-primary);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cities h3 {
+  font-size: 1.7rem;
+  font-weight: 600;
+  margin-right: auto;
+}
+
+.cities button {
+  height: 2rem;
+  border-radius: 50%;
+  border: none;
+  color: var(--color-light-4);
+  font-size: 1.6rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all .4s;
+  aspect-ratio: 1;
+}
+
+.cities button:hover {
+  background-color: var(--color-red);
+  color: var(--color-light-2);
+}
+
+.map {
+  flex: 1;
+}
+
+.countries {
+  width: 100%;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: start;
+  gap: 1.6rem;
+}
+
+.countries li {
+  text-align: center;
+  gap: .2rem;
+  font-size: 1.7rem;
+  font-weight: 600;
+  background-color: var(--color-light-2);
+  border-radius: 7px;
+  padding: 1.2rem 2rem;
+  border-left: 5px solid var(--color-primary);
+}
+
+.city-details {
+  padding: 2rem 3rem;
+  max-height: 70%;
+  background-color: var(--color-light-2);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  color: var(--color-light-1);
+}
+
+.city-details .row {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.city-details h5 {
+  text-transform: uppercase;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.city-details h3 {
+  font-size: 1.9rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.city-details p {
+  font-size: 1.6rem;
 }
