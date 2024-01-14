@@ -2,7 +2,12 @@
 
 :root {
   --color-primary: #4369FC;
-  --color-text-dark: #42484D;
+  --color-dark-1: #42484D;
+  --color-light-1: #666;
+  --color-light-2: #eaeaea;
+  --color-light-3: #d8d8d8;
+  --color-light-4: #b7b7b7;
+  --color-red: #fc4343;
 }
 
 * {
@@ -106,7 +111,8 @@ main {
 
 .main-pricing,
 .main-about,
-.main-not-found {
+.main-not-found,
+.main-login {
   background-color: white;
   color: #666;
   display: flex;
@@ -156,4 +162,40 @@ main {
 
 .main-not-found {
   text-align: center;
+}
+
+.form-login {
+  background-color: var(--color-light-2);
+  border-radius: 7px;
+  color: var(--color-dark-1);
+  padding: 2rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 48rem;
+  margin: 8rem auto;
+  font-size: 1.6rem;
+}
+
+.form-login input {
+  background-color: #f4f4f4;
+  display: block;
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+.form-login button {
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: 5px;
+  padding: 1rem 3rem;
+  border: none;
+  margin-top: 10px;
+}
+
+.form-login button:hover {
+  cursor: pointer;
 }
