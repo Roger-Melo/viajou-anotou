@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { useMap, MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -7,6 +7,7 @@ import {
   useParams,
   useLoaderData,
   useOutletContext,
+  useSearchParams,
   RouterProvider,
   Route,
   NavLink,
@@ -139,10 +140,19 @@ const citiesLoader = async () => {
   return cities.json()
 }
 
+const ChangeCenter = ({ position }) => {
+  const map = useMap()
+  map.setView(position)
+  return null
+}
+
 const curitibaPosition = { latitude: '-25.437370980404776', longitude: '-49.27058902123733' }
 
 const AppLayout = () => {
   const cities = useLoaderData()
+  const [searchParams] = useSearchParams()
+  const latitude = searchParams.get('latitude')
+  const longitude = searchParams.get('longitude')
   return (
     <main className="main-app-layout">
       <div className="sidebar">
@@ -165,6 +175,7 @@ const AppLayout = () => {
               <Popup>{name}</Popup>
             </Marker>
           )}
+          {latitude && longitude && <ChangeCenter position={[latitude, longitude]} />}
         </MapContainer>
       </div>
     </main>
@@ -175,10 +186,10 @@ const Cities = () => {
   const cities = useOutletContext()
   return cities.length === 0 ? <p>Adicione uma cidade</p> : (
     <ul className="cities">
-      {cities.map(city =>
-        <li key={city.id}>
-          <Link to={`${city.id}`}>
-            <h3>{city.name}</h3>
+      {cities.map(({ id, position, name }) =>
+        <li key={id}>
+          <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
+            <h3>{name}</h3>
             <button>&times;</button>
           </Link>
         </li>
