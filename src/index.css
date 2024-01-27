@@ -358,3 +358,15 @@ main {
 .city-details p {
   font-size: 1.6rem;
 }
+
+.city-details .btn-back {
+  font-weight: 600;
+  font-size: 1.6rem;
+  background: none;
+  border-radius: 5px;
+  padding: 1rem 3rem;
+  color: var(--color-light-1);
+  border: 1px solid var(--color-light-1);
+  cursor: pointer;
+  width: 14rem;
+}

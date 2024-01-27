@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   createBrowserRouter,
   createRoutesFromElements,
+  useNavigate,
   useLocation,
   useParams,
   RouterProvider,
@@ -176,7 +177,9 @@ const Countries = ({ cities }) => {
 
 const TripDetails = ({ cities }) => {
   const params = useParams()
+  const navigate = useNavigate()
   const city = cities.find(city => params.id === String(city.id))
+  const handleClickBack = () => navigate(-1)
   return (
     <div className="city-details">
       <div className="row">
@@ -187,6 +190,7 @@ const TripDetails = ({ cities }) => {
         <h5>Suas anotações</h5>
         <p>{city.notes}</p>
       </div>
+      <button className="btn-back" onClick={handleClickBack}>&larr; Voltar</button>
     </div>
   )
 }
