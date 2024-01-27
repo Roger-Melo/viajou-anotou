@@ -209,7 +209,7 @@ const App = () => {
         <Route path="preco" element={<Pricing />} />
         <Route path="login" element={<Login />} />
         <Route path="app" element={<AppLayout />}>
-          <Route index element={<Navigate to="cidades" />} />
+          <Route index element={<Navigate to="cidades" replace />} />
           <Route path="cidades" element={<Cities cities={cities} />} />
           <Route path="cidades/:id" element={<TripDetails cities={cities} />} />
           <Route path="paises" element={<Countries cities={cities} />} />
