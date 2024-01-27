@@ -1,14 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useMap, MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import {
   createBrowserRouter,
   createRoutesFromElements,
+  useNavigate,
   useLocation,
   useParams,
+  useLoaderData,
+  useOutletContext,
+  useSearchParams,
   RouterProvider,
   Route,
   NavLink,
   Link,
-  Outlet
+  Outlet,
+  Navigate
 } from 'react-router-dom'
 
 const links = [
@@ -130,40 +135,71 @@ const Login = () =>
     </main>
   </>
 
-const AppLayout = () =>
-  <main className="main-app-layout">
-    <div className="sidebar">
-      <header>
-        <Logo />
-      </header>
-      <nav className="nav-app-layout">
-        <ul>
-          <li><NavLink to="cidades">Cidades</NavLink></li>
-          <li><NavLink to="paises">Países</NavLink></li>
-        </ul>
-      </nav>
-      <Outlet />
-    </div>
-    <div className="map">
-      <h2>Map</h2>
-    </div>
-  </main>
+const citiesLoader = async () => {
+  const cities = await fetch('https://raw.githubusercontent.com/Roger-Melo/fake-data/main/fake-cities.json')
+  return cities.json()
+}
 
-const Cities = ({ cities }) =>
-  cities.length === 0 ? <p>Adicione uma cidade</p> : (
+const ChangeCenter = ({ position }) => {
+  const map = useMap()
+  map.setView(position)
+  return null
+}
+
+const curitibaPosition = { latitude: '-25.437370980404776', longitude: '-49.27058902123733' }
+
+const AppLayout = () => {
+  const cities = useLoaderData()
+  const [searchParams] = useSearchParams()
+  const latitude = searchParams.get('latitude')
+  const longitude = searchParams.get('longitude')
+  return (
+    <main className="main-app-layout">
+      <div className="sidebar">
+        <header>
+          <Logo />
+        </header>
+        <nav className="nav-app-layout">
+          <ul>
+            <li><NavLink to="cidades">Cidades</NavLink></li>
+            <li><NavLink to="paises">Países</NavLink></li>
+          </ul>
+        </nav>
+        <Outlet context={cities} />
+      </div>
+      <div className="map">
+        <MapContainer className="map-container" center={[curitibaPosition.latitude, curitibaPosition.longitude]} zoom={11} scrollWheelZoom={true}>
+          <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {cities.map(({ id, position, name }) =>
+            <Marker key={id} position={[position.latitude, position.longitude]}>
+              <Popup>{name}</Popup>
+            </Marker>
+          )}
+          {latitude && longitude && <ChangeCenter position={[latitude, longitude]} />}
+        </MapContainer>
+      </div>
+    </main>
+  )
+}
+
+const Cities = () => {
+  const cities = useOutletContext()
+  return cities.length === 0 ? <p>Adicione uma cidade</p> : (
     <ul className="cities">
-      {cities.map(city =>
-        <li key={city.id}>
-          <Link to={`${city.id}`}>
-            <h3>{city.name}</h3>
+      {cities.map(({ id, position, name }) =>
+        <li key={id}>
+          <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
+            <h3>{name}</h3>
             <button>&times;</button>
           </Link>
         </li>
       )}
     </ul>
   )
+}
 
-const Countries = ({ cities }) => {
+const Countries = () => {
+  const cities = useOutletContext()
   const groupedByCountry = Object.groupBy(cities, ({ country }) => country)
   const countries = Object.keys(groupedByCountry)
   return (
@@ -173,9 +209,12 @@ const Countries = ({ cities }) => {
   )
 }
 
-const TripDetails = ({ cities }) => {
+const TripDetails = () => {
   const params = useParams()
+  const navigate = useNavigate()
+  const cities = useOutletContext()
   const city = cities.find(city => params.id === String(city.id))
+  const handleClickBack = () => navigate(-1)
   return (
     <div className="city-details">
       <div className="row">
@@ -186,20 +225,12 @@ const TripDetails = ({ cities }) => {
         <h5>Suas anotações</h5>
         <p>{city.notes}</p>
       </div>
+      <button className="btn-back" onClick={handleClickBack}>&larr; Voltar</button>
     </div>
   )
 }
 
 const App = () => {
-  const [cities, setCities] = useState([])
-
-  useEffect(() => {
-    fetch('https://raw.githubusercontent.com/Roger-Melo/fake-data/main/fake-cities.json')
-      .then(response => response.json())
-      .then(setCities)
-      .catch(error => alert(error.message))
-  }, [])
-
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/">
@@ -207,11 +238,11 @@ const App = () => {
         <Route path="sobre" element={<About />} />
         <Route path="preco" element={<Pricing />} />
         <Route path="login" element={<Login />} />
-        <Route path="app" element={<AppLayout />}>
-          <Route index element={<Cities cities={cities} />} />
-          <Route path="cidades" element={<Cities cities={cities} />} />
-          <Route path="cidades/:id" element={<TripDetails cities={cities} />} />
-          <Route path="paises" element={<Countries cities={cities} />} />
+        <Route path="app" element={<AppLayout />} loader={citiesLoader}>
+          <Route index element={<Navigate to="cidades" replace />} />
+          <Route path="cidades" element={<Cities />} />
+          <Route path="cidades/:id" element={<TripDetails />} />
+          <Route path="paises" element={<Countries />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Route>
