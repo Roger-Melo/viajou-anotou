@@ -139,6 +139,8 @@ const citiesLoader = async () => {
   return cities.json()
 }
 
+const curitibaPosition = { latitude: '-25.437370980404776', longitude: '-49.27058902123733' }
+
 const AppLayout = () => {
   const cities = useLoaderData()
   return (
@@ -156,11 +158,13 @@ const AppLayout = () => {
         <Outlet context={cities} />
       </div>
       <div className="map">
-        <MapContainer className="map-container" center={[51.505, -0.09]} zoom={11} scrollWheelZoom={true}>
+        <MapContainer className="map-container" center={[curitibaPosition.latitude, curitibaPosition.longitude]} zoom={11} scrollWheelZoom={true}>
           <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={[51.505, -0.09]}>
-            <Popup>A pretty CSS3 popup. <br /> Easily customizable.</Popup>
-          </Marker>
+          {cities.map(({ id, position, name }) =>
+            <Marker key={id} position={[position.latitude, position.longitude]}>
+              <Popup>{name}</Popup>
+            </Marker>
+          )}
         </MapContainer>
       </div>
     </main>
