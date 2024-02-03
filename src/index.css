@@ -6,7 +6,6 @@
   --color-light-1: #666;
   --color-light-2: #eaeaea;
   --color-light-3: #d8d8d8;
-  --color-light-4: #b7b7b7;
   --color-red: #fc4343;
 }
 
@@ -283,23 +282,6 @@ main {
   margin-right: auto;
 }
 
-.cities button {
-  height: 2rem;
-  border-radius: 50%;
-  border: none;
-  color: var(--color-light-4);
-  font-size: 1.6rem;
-  font-weight: 400;
-  cursor: pointer;
-  transition: all .4s;
-  aspect-ratio: 1;
-}
-
-.cities button:hover {
-  background-color: var(--color-red);
-  color: var(--color-light-2);
-}
-
 .map {
   flex: 1;
 }
@@ -359,16 +341,30 @@ main {
   font-size: 1.6rem;
 }
 
-.city-details .btn-back {
+.city-details .buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.city-details button {
   font-weight: 600;
   font-size: 1.6rem;
   background: none;
   border-radius: 5px;
-  padding: 1rem 3rem;
-  color: var(--color-light-1);
-  border: 1px solid var(--color-light-1);
+  padding: 1rem 1rem;
   cursor: pointer;
-  width: 14rem;
+  width: 10rem;
+}
+
+.city-details .btn-back {
+  border: 1px solid var(--color-light-1);
+  color: var(--color-light-1);
+}
+
+.city-details .btn-delete {
+  color: var(--color-red);
+  border: 1px solid var(--color-red);
 }
 
 .map-container {

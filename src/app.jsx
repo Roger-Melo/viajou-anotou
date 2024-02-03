@@ -204,7 +204,6 @@ const Cities = () => {
           <li key={id}>
             <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
               <h3>{name}</h3>
-              <button>&times;</button>
             </Link>
           </li>
         )}
@@ -229,6 +228,14 @@ const TripDetails = () => {
   const cities = useOutletContext()
   const city = cities.find(city => params.id === String(city.id))
   const handleClickBack = () => navigate('/app/cidades')
+
+  const deleteContact = e => {
+    const wantToDelete = confirm('Por favor, confirme que você quer deletar essa viagem.')
+    if (!wantToDelete) {
+      e.preventDefault()
+    }
+  }
+
   return (
     <div className="city-details">
       <div className="row">
@@ -239,7 +246,12 @@ const TripDetails = () => {
         <h5>Suas anotações</h5>
         <p>{city.notes}</p>
       </div>
-      <button className="btn-back" onClick={handleClickBack}>&larr; Voltar</button>
+      <div className="buttons">
+        <button className="btn-back" onClick={handleClickBack}>&larr; Voltar</button>
+        <Form method="post" action="delete" onSubmit={deleteContact}>
+          <button className="btn-delete" type="submit">&times; Deletar</button>
+        </Form>
+      </div>
     </div>
   )
 }
@@ -291,6 +303,12 @@ const FormAddCity = () => {
   )
 }
 
+const deleteAction = async ({ params }) => {
+  const cities = await localforage.getItem('cities')
+  await localforage.setItem('cities', cities ? cities.filter(city => city.id !== params.id) : [])
+  return redirect('/app/cidades')
+}
+
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -304,6 +322,7 @@ const App = () => {
           <Route path="cidades" element={<Cities />} />
           <Route path="cidades/:id" element={<TripDetails />} />
           <Route path="cidades/:id/form" element={<FormAddCity />} loader={cityLoader} action={formAction} />
+          <Route path="cidades/:id/delete" action={deleteAction} />
           <Route path="paises" element={<Countries />} />
         </Route>
         <Route path="*" element={<NotFound />} />
