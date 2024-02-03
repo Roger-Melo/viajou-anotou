@@ -1,8 +1,9 @@
 import localforage from 'localforage'
-import { useMap, MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { useMapEvents, useMap, MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import {
   createBrowserRouter,
   createRoutesFromElements,
+  redirect,
   useNavigate,
   useLocation,
   useParams,
@@ -14,7 +15,8 @@ import {
   NavLink,
   Link,
   Outlet,
-  Navigate
+  Navigate,
+  Form
 } from 'react-router-dom'
 
 const links = [
@@ -147,6 +149,14 @@ const ChangeCenter = ({ position }) => {
   return null
 }
 
+const ChangeToClickedCity = () => {
+  const navigate = useNavigate()
+  const id = crypto.randomUUID()
+  useMapEvents({
+    click: e => navigate(`cidades/${id}/form?latitude=${e.latlng.lat}&longitude=${e.latlng.lng}`)
+  })
+}
+
 const curitibaPosition = { latitude: '-25.437370980404776', longitude: '-49.27058902123733' }
 
 const AppLayout = () => {
@@ -177,6 +187,7 @@ const AppLayout = () => {
             </Marker>
           )}
           {latitude && longitude && <ChangeCenter position={[latitude, longitude]} />}
+          <ChangeToClickedCity />
         </MapContainer>
       </div>
     </main>
@@ -217,7 +228,7 @@ const TripDetails = () => {
   const navigate = useNavigate()
   const cities = useOutletContext()
   const city = cities.find(city => params.id === String(city.id))
-  const handleClickBack = () => navigate(-1)
+  const handleClickBack = () => navigate('/app/cidades')
   return (
     <div className="city-details">
       <div className="row">
@@ -233,6 +244,53 @@ const TripDetails = () => {
   )
 }
 
+const cityLoader = async ({ request, params }) => {
+  const url = new URL(request.url)
+  const latitude = url.searchParams.get('latitude')
+  const longitude = url.searchParams.get('longitude')
+  const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
+  const info = await response.json()
+  return { name: info.city, id: params.id }
+}
+
+const formAction = async ({ request, params }) => {
+  const url = new URL(request.url)
+  const [latitude, longitude] = ['latitude', 'longitude'].map(item => url.searchParams.get(item))
+  const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
+  const info = await response.json()
+  const formData = await request.formData()
+  const city = { ...Object.fromEntries(formData), position: { latitude, longitude }, id: params.id, country: info.countryName }
+  const cities = await localforage.getItem('cities')
+  await localforage.setItem('cities', cities ? [...cities, city] : [city])
+  return redirect(`/app/cidades/${params.id}`)
+}
+
+const FormAddCity = () => {
+  const city = useLoaderData()
+  const navigate = useNavigate()
+  const handleClickBack = () => navigate('/app/cidades')
+  return (
+    <Form method="post" className="form-add-city">
+      <label>
+        <span>Nome da cidade</span>
+        <input key={city.id} defaultValue={city.name} name="name" required />
+      </label>
+      <label>
+        <span>Quando você foi para {city.name}?</span>
+        <input name="date" required type="date" />
+      </label>
+      <label>
+        <span>Suas anotações sobre a cidade</span>
+        <textarea name="notes" required></textarea>
+      </label>
+      <div className="buttons">
+        <button onClick={handleClickBack} type="button">&larr; Voltar</button>
+        <button type="submit">Adicionar</button>
+      </div>
+    </Form>
+  )
+}
+
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -245,6 +303,7 @@ const App = () => {
           <Route index element={<Navigate to="cidades" replace />} />
           <Route path="cidades" element={<Cities />} />
           <Route path="cidades/:id" element={<TripDetails />} />
+          <Route path="cidades/:id/form" element={<FormAddCity />} loader={cityLoader} action={formAction} />
           <Route path="paises" element={<Countries />} />
         </Route>
         <Route path="*" element={<NotFound />} />
