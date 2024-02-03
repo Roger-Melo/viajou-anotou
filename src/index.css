@@ -379,3 +379,10 @@ main {
 .leaflet-control-attribution {
   font-size: 1.3rem;
 }
+
+.initial-message {
+  text-align: center;
+  font-size: 2rem;
+  margin: 2rem auto;
+  font-weight: 600;
+}

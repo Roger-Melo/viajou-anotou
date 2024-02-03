@@ -1,3 +1,4 @@
+import localforage from 'localforage'
 import { useMap, MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import {
   createBrowserRouter,
@@ -136,8 +137,8 @@ const Login = () =>
   </>
 
 const citiesLoader = async () => {
-  const cities = await fetch('https://raw.githubusercontent.com/Roger-Melo/fake-data/main/fake-cities.json')
-  return cities.json()
+  const cities = await localforage.getItem('cities')
+  return cities ?? []
 }
 
 const ChangeCenter = ({ position }) => {
@@ -184,18 +185,20 @@ const AppLayout = () => {
 
 const Cities = () => {
   const cities = useOutletContext()
-  return cities.length === 0 ? <p>Adicione uma cidade</p> : (
-    <ul className="cities">
-      {cities.map(({ id, position, name }) =>
-        <li key={id}>
-          <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
-            <h3>{name}</h3>
-            <button>&times;</button>
-          </Link>
-        </li>
-      )}
-    </ul>
-  )
+  return cities.length === 0
+    ? <p className="initial-message">Clique no mapa para adicionar uma cidade</p>
+    : (
+      <ul className="cities">
+        {cities.map(({ id, position, name }) =>
+          <li key={id}>
+            <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
+              <h3>{name}</h3>
+              <button>&times;</button>
+            </Link>
+          </li>
+        )}
+      </ul>
+    )
 }
 
 const Countries = () => {
