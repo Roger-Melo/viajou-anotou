@@ -153,7 +153,7 @@ const ChangeToClickedCity = () => {
   const navigate = useNavigate()
   const id = crypto.randomUUID()
   useMapEvents({
-    click: e => navigate(`cidades/${id}/form?latitude=${e.latlng.lat}&longitude=${e.latlng.lng}`)
+    click: e => navigate(`cidades/${id}/edit?latitude=${e.latlng.lat}&longitude=${e.latlng.lng}`)
   })
 }
 
@@ -243,11 +243,18 @@ const TripDetails = () => {
         <h3>{city.name}</h3>
       </div>
       <div className="row">
+        <h5>Quando você foi para {city.name}</h5>
+        <p>{city.date}</p>
+      </div>
+      <div className="row">
         <h5>Suas anotações</h5>
         <p>{city.notes}</p>
       </div>
       <div className="buttons">
         <button className="btn-back" onClick={handleClickBack}>&larr; Voltar</button>
+        <Form action="edit">
+          <button className="btn-edit" type="submit" action="edit">&there4; Editar</button>
+        </Form>
         <Form method="post" action="delete" onSubmit={deleteContact}>
           <button className="btn-delete" type="submit">&times; Deletar</button>
         </Form>
@@ -257,6 +264,11 @@ const TripDetails = () => {
 }
 
 const cityLoader = async ({ request, params }) => {
+  const cityInStorage = await localforage.getItem('cities').then(cities => cities?.find(city => city.id === params.id))
+  if (cityInStorage) {
+    return cityInStorage
+  }
+
   const url = new URL(request.url)
   const latitude = url.searchParams.get('latitude')
   const longitude = url.searchParams.get('longitude')
@@ -266,18 +278,25 @@ const cityLoader = async ({ request, params }) => {
 }
 
 const formAction = async ({ request, params }) => {
+  const formData = await request.formData()
+  const cities = await localforage.getItem('cities')
+  const cityInStorage = await localforage.getItem('cities').then(cities => cities?.find(city => city.id === params.id))
+  if (cityInStorage) {
+    const city = { ...Object.fromEntries(formData), position: cityInStorage.position, id: cityInStorage.id, country: cityInStorage.country }
+    await localforage.setItem('cities', [...cities.filter(city => city.id !== params.id), city])
+    return redirect(`/app/cidades/${params.id}`)
+  }
+
   const url = new URL(request.url)
   const [latitude, longitude] = ['latitude', 'longitude'].map(item => url.searchParams.get(item))
   const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
   const info = await response.json()
-  const formData = await request.formData()
   const city = { ...Object.fromEntries(formData), position: { latitude, longitude }, id: params.id, country: info.countryName }
-  const cities = await localforage.getItem('cities')
   await localforage.setItem('cities', cities ? [...cities, city] : [city])
   return redirect(`/app/cidades/${params.id}`)
 }
 
-const FormAddCity = () => {
+const EditCity = () => {
   const city = useLoaderData()
   const navigate = useNavigate()
   const handleClickBack = () => navigate('/app/cidades')
@@ -289,11 +308,11 @@ const FormAddCity = () => {
       </label>
       <label>
         <span>Quando você foi para {city.name}?</span>
-        <input name="date" required type="date" />
+        <input name="date" required type="date" defaultValue={city.date || ''} />
       </label>
       <label>
         <span>Suas anotações sobre a cidade</span>
-        <textarea name="notes" required></textarea>
+        <textarea name="notes" required defaultValue={city.notes || ''}></textarea>
       </label>
       <div className="buttons">
         <button onClick={handleClickBack} type="button">&larr; Voltar</button>
@@ -321,7 +340,7 @@ const App = () => {
           <Route index element={<Navigate to="cidades" replace />} />
           <Route path="cidades" element={<Cities />} />
           <Route path="cidades/:id" element={<TripDetails />} />
-          <Route path="cidades/:id/form" element={<FormAddCity />} loader={cityLoader} action={formAction} />
+          <Route path="cidades/:id/edit" element={<EditCity />} loader={cityLoader} action={formAction} />
           <Route path="cidades/:id/delete" action={deleteAction} />
           <Route path="paises" element={<Countries />} />
         </Route>

@@ -344,7 +344,7 @@ main {
 .city-details .buttons {
   display: flex;
   gap: 1rem;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 .city-details button {
@@ -355,16 +355,22 @@ main {
   padding: 1rem 1rem;
   cursor: pointer;
   width: 10rem;
+  border: none;
 }
 
 .city-details .btn-back {
-  border: 1px solid var(--color-light-1);
   color: var(--color-light-1);
+  border: 1px solid var(--color-light-1);
 }
 
 .city-details .btn-delete {
   color: var(--color-red);
   border: 1px solid var(--color-red);
+}
+
+.city-details .btn-edit {
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
 }
 
 .map-container {
