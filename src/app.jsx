@@ -301,7 +301,7 @@ const EditCity = () => {
   const navigate = useNavigate()
   const handleClickBack = () => navigate('/app/cidades')
   return (
-    <Form method="post" className="form-add-city">
+    <Form method="post" className="form-edit-city">
       <label>
         <span>Nome da cidade</span>
         <input key={city.id} defaultValue={city.name} name="name" required />
@@ -315,8 +315,8 @@ const EditCity = () => {
         <textarea name="notes" required defaultValue={city.notes || ''}></textarea>
       </label>
       <div className="buttons">
-        <button onClick={handleClickBack} type="button">&larr; Voltar</button>
-        <button type="submit">Adicionar</button>
+        <button onClick={handleClickBack} className="btn-back" type="button">&larr; Voltar</button>
+        <button className="btn-save" type="submit">Salvar</button>
       </div>
     </Form>
   )
