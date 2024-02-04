@@ -253,7 +253,7 @@ const TripDetails = () => {
       <div className="buttons">
         <button className="btn-back" onClick={handleClickBack}>&larr; Voltar</button>
         <Form action="edit">
-          <button className="btn-edit" type="submit" action="edit">&there4; Editar</button>
+          <button className="btn-edit" type="submit">&there4; Editar</button>
         </Form>
         <Form method="post" action="delete" onSubmit={deleteContact}>
           <button className="btn-delete" type="submit">&times; Deletar</button>
