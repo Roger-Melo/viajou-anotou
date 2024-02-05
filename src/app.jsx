@@ -1,7 +1,9 @@
-import { useMap, MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import localforage from 'localforage'
+import { useMap, useMapEvents, MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import {
   createBrowserRouter,
   createRoutesFromElements,
+  redirect,
   useNavigate,
   useLocation,
   useParams,
@@ -13,7 +15,8 @@ import {
   NavLink,
   Link,
   Outlet,
-  Navigate
+  Navigate,
+  Form
 } from 'react-router-dom'
 
 const links = [
@@ -136,14 +139,22 @@ const Login = () =>
   </>
 
 const citiesLoader = async () => {
-  const cities = await fetch('https://raw.githubusercontent.com/Roger-Melo/fake-data/main/fake-cities.json')
-  return cities.json()
+  const cities = await localforage.getItem('cities')
+  return cities ?? []
 }
 
 const ChangeCenter = ({ position }) => {
   const map = useMap()
   map.setView(position)
   return null
+}
+
+const ChangeToClickedCity = () => {
+  const navigate = useNavigate()
+  const id = crypto.randomUUID()
+  useMapEvents({
+    click: e => navigate(`cidades/${id}/edit?latitude=${e.latlng.lat}&longitude=${e.latlng.lng}`)
+  })
 }
 
 const curitibaPosition = { latitude: '-25.437370980404776', longitude: '-49.27058902123733' }
@@ -176,6 +187,7 @@ const AppLayout = () => {
             </Marker>
           )}
           {latitude && longitude && <ChangeCenter position={[latitude, longitude]} />}
+          <ChangeToClickedCity />
         </MapContainer>
       </div>
     </main>
@@ -184,18 +196,19 @@ const AppLayout = () => {
 
 const Cities = () => {
   const cities = useOutletContext()
-  return cities.length === 0 ? <p>Adicione uma cidade</p> : (
-    <ul className="cities">
-      {cities.map(({ id, position, name }) =>
-        <li key={id}>
-          <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
-            <h3>{name}</h3>
-            <button>&times;</button>
-          </Link>
-        </li>
-      )}
-    </ul>
-  )
+  return cities.length === 0
+    ? <p className="initial-message">Clique no mapa para adicionar uma cidade</p>
+    : (
+      <ul className="cities">
+        {cities.map(({ id, position, name }) =>
+          <li key={id}>
+            <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
+              <h3>{name}</h3>
+            </Link>
+          </li>
+        )}
+      </ul>
+    )
 }
 
 const Countries = () => {
@@ -214,7 +227,15 @@ const TripDetails = () => {
   const navigate = useNavigate()
   const cities = useOutletContext()
   const city = cities.find(city => params.id === String(city.id))
-  const handleClickBack = () => navigate(-1)
+  const handleClickBack = () => navigate('/app/cidades')
+
+  const deleteContact = e => {
+    const wantToDelete = confirm('Por favor, confirme que você quer deletar essa viagem.')
+    if (!wantToDelete) {
+      e.preventDefault()
+    }
+  }
+
   return (
     <div className="city-details">
       <div className="row">
@@ -222,12 +243,88 @@ const TripDetails = () => {
         <h3>{city.name}</h3>
       </div>
       <div className="row">
+        <h5>Quando você foi para {city.name}?</h5>
+        <p>{city.date}</p>
+      </div>
+      <div className="row">
         <h5>Suas anotações</h5>
         <p>{city.notes}</p>
       </div>
-      <button className="btn-back" onClick={handleClickBack}>&larr; Voltar</button>
+      <div className="buttons">
+        <button className="btn-back" onClick={handleClickBack}>&larr; Voltar</button>
+        <Form action="edit">
+          <button className="btn-edit" type="submit">&there4; Editar</button>
+        </Form>
+        <Form method="post" action="delete" onSubmit={deleteContact}>
+          <button className="btn-delete" type="submit">&times; Deletar</button>
+        </Form>
+      </div>
     </div>
   )
+}
+
+const cityLoader = async ({ request, params }) => {
+  const cityInStorage = await localforage.getItem('cities').then(cities => cities?.find(city => city.id === params.id))
+  if (cityInStorage) {
+    return cityInStorage
+  }
+
+  const url = new URL(request.url)
+  const [latitude, longitude] = ['latitude', 'longitude'].map(item => url.searchParams.get(item))
+  const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
+  const info = await response.json()
+  return { name: info.city, id: params.id }
+}
+
+const formAction = async ({ request, params }) => {
+  const formData = await request.formData()
+  const cities = await localforage.getItem('cities')
+  const cityInStorage = await localforage.getItem('cities').then(cities => cities?.find(city => city.id === params.id))
+  if (cityInStorage) {
+    const city = { ...Object.fromEntries(formData), position: cityInStorage.position, id: cityInStorage.id, country: cityInStorage.country }
+    await localforage.setItem('cities', [...cities.filter(city => city.id !== params.id), city])
+    return redirect(`/app/cidades/${params.id}`)
+  }
+
+  const url = new URL(request.url)
+  const [latitude, longitude] = ['latitude', 'longitude'].map(item => url.searchParams.get(item))
+  const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
+  const info = await response.json()
+  const city = { ...Object.fromEntries(formData), position: { latitude, longitude }, id: params.id, country: info.countryName }
+  await localforage.setItem('cities', cities ? [...cities, city] : [city])
+  return redirect(`/app/cidades/${params.id}`)
+}
+
+const EditCity = () => {
+  const city = useLoaderData()
+  const navigate = useNavigate()
+  const handleClickBack = () => navigate('/app/cidades')
+  return (
+    <Form method="post" className="form-edit-city">
+      <label>
+        <span>Nome da cidade</span>
+        <input key={city.id} defaultValue={city.name} name="name" required />
+      </label>
+      <label>
+        <span>Quando você foi para {city.name}?</span>
+        <input name="date" required type="date" defaultValue={city.date || ''} />
+      </label>
+      <label>
+        <span>Suas anotações sobre a cidade</span>
+        <textarea name="notes" required defaultValue={city.notes || ''}></textarea>
+      </label>
+      <div className="buttons">
+        <button onClick={handleClickBack} className="btn-back" type="button">&larr; Voltar</button>
+        <button className="btn-save" type="submit">Salvar</button>
+      </div>
+    </Form>
+  )
+}
+
+const deleteAction = async ({ params }) => {
+  const cities = await localforage.getItem('cities')
+  await localforage.setItem('cities', cities ? cities.filter(city => city.id !== params.id) : [])
+  return redirect('/app/cidades')
 }
 
 const App = () => {
@@ -242,6 +339,8 @@ const App = () => {
           <Route index element={<Navigate to="cidades" replace />} />
           <Route path="cidades" element={<Cities />} />
           <Route path="cidades/:id" element={<TripDetails />} />
+          <Route path="cidades/:id/edit" element={<EditCity />} loader={cityLoader} action={formAction} />
+          <Route path="cidades/:id/delete" action={deleteAction} />
           <Route path="paises" element={<Countries />} />
         </Route>
         <Route path="*" element={<NotFound />} />
