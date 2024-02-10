@@ -230,7 +230,7 @@ const TripDetails = () => {
   const city = cities.find(city => params.id === String(city.id))
   const handleClickBack = () => navigate('/app/cidades')
 
-  const deleteContact = e => {
+  const deleteTrip = e => {
     const wantToDelete = confirm('Por favor, confirme que você quer deletar essa viagem.')
     if (!wantToDelete) {
       e.preventDefault()
@@ -256,7 +256,7 @@ const TripDetails = () => {
         <Form action="edit">
           <button className="btn-edit" type="submit">&there4; Editar</button>
         </Form>
-        <Form method="post" action="delete" onSubmit={deleteContact}>
+        <Form method="post" action="delete" onSubmit={deleteTrip}>
           <button className="btn-delete" type="submit">&times; Deletar</button>
         </Form>
       </div>
