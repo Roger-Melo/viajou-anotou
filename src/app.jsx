@@ -10,6 +10,7 @@ import {
   useLoaderData,
   useOutletContext,
   useSearchParams,
+  useRouteError,
   RouterProvider,
   Route,
   NavLink,
@@ -327,23 +328,43 @@ const deleteAction = async ({ params }) => {
   return redirect('/app/cidades')
 }
 
+const ErrorMessage = () => {
+  const error = useRouteError()
+  return (
+    <>
+      <Header />
+      <main className="main-not-found">
+        <section>
+          <div>
+            <h1>Opa!</h1>
+            <p>Desculpe, um erro inesperado aconteceu:</p>
+            <p><i>{error.message}</i></p>
+          </div>
+        </section>
+      </main>
+    </>
+  )
+}
+
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/">
-        <Route index element={<Home />} />
-        <Route path="sobre" element={<About />} />
-        <Route path="preco" element={<Pricing />} />
-        <Route path="login" element={<Login />} />
-        <Route path="app" element={<AppLayout />} loader={citiesLoader}>
-          <Route index element={<Navigate to="cidades" replace />} />
-          <Route path="cidades" element={<Cities />} />
-          <Route path="cidades/:id" element={<TripDetails />} />
-          <Route path="cidades/:id/edit" element={<EditCity />} loader={cityLoader} action={formAction} />
-          <Route path="cidades/:id/delete" action={deleteAction} />
-          <Route path="paises" element={<Countries />} />
+        <Route errorElement={<ErrorMessage />}>
+          <Route index element={<Home />} />
+          <Route path="sobre" element={<About />} />
+          <Route path="preco" element={<Pricing />} />
+          <Route path="login" element={<Login />} />
+          <Route path="app" element={<AppLayout />} loader={citiesLoader}>
+            <Route index element={<Navigate to="cidades" replace />} />
+            <Route path="cidades" element={<Cities />} />
+            <Route path="cidades/:id" element={<TripDetails />} />
+            <Route path="cidades/:id/edit" element={<EditCity />} loader={cityLoader} action={formAction} />
+            <Route path="cidades/:id/delete" action={deleteAction} />
+            <Route path="paises" element={<Countries />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
         </Route>
-        <Route path="*" element={<NotFound />} />
       </Route>
     )
   )
