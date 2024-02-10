@@ -214,8 +214,11 @@ const Cities = () => {
 
 const Countries = () => {
   const cities = useOutletContext()
-  const groupedByCountry = Object.groupBy(cities, ({ country }) => country)
-  const countries = Object.keys(groupedByCountry)
+  const countries = cities.reduce((acc, city) => {
+    const duplicatedCountry = acc.some(accItem => accItem === city.country)
+    return duplicatedCountry ? acc : [...acc, city.country]
+  }, [])
+
   return (
     <ul className="countries">
       {countries.map(country => <li key={country}>{country}</li>)}
