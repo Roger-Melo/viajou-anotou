@@ -84,7 +84,6 @@ main {
 }
 
 .nav {
-  position: absolute;
   top: 5rem;
   width: 100%;
   display: flex;

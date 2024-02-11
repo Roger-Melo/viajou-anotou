@@ -37,7 +37,7 @@ const Header = () => {
   const isNotHomepage = location.pathname !== '/'
   return (
     <header>
-      <nav className="nav">
+      <nav className="nav pa">
         <Logo version={isNotHomepage ? 'dark' : 'light'} />
         <ul>
           {links.map(link => {
