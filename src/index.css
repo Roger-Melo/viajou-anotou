@@ -283,14 +283,6 @@ main {
   margin-right: auto;
 }
 
-/* .cities .country-flag {
-  width: 20px;
-  height: 15px;
-  position: absolute;
-  left: 10px;
-  top: 1.7rem;
-} */
-
 .map {
   flex: 1;
 }
@@ -427,14 +419,6 @@ main {
   font-weight: 600;
   position: relative;
 }
-
-/* .form-edit-city .country-flag {
-  width: 20px;
-  height: 15px;
-  position: absolute;
-  right: 10px;
-  top: 3.5rem;
-} */
 
 .form-edit-city input,
 .form-edit-city textarea {
