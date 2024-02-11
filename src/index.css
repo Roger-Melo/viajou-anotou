@@ -437,3 +437,15 @@ main {
 .mb--3px {
   margin-bottom: -3px;
 }
+
+.pa {
+  position: absolute;
+}
+
+.r1 {
+  right: 1rem;
+}
+
+.t-3-5 {
+  top: 3.5rem;
+}

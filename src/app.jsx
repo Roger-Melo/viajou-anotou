@@ -256,7 +256,7 @@ const TripDetails = () => {
       <div className="row">
         <h5>Nome da cidade</h5>
         <h3>
-          <CountryFlag country={city.country} className="pa" />
+          <CountryFlag country={city.country} />
           {city.name}
         </h3>
       </div>
@@ -322,7 +322,7 @@ const EditCity = () => {
       <label>
         <span>Nome da cidade</span>
         <input key={city.id} defaultValue={city.name} name="name" required />
-        <CountryFlag country={city.country} />
+        <CountryFlag country={city.country} className="pa r1 t-3-5" />
       </label>
       <label>
         <span>Quando você foi para {city.name}?</span>
