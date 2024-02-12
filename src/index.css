@@ -84,7 +84,6 @@ main {
 }
 
 .nav {
-  position: absolute;
   top: 5rem;
   width: 100%;
   display: flex;
@@ -266,7 +265,7 @@ main {
 .cities a {
   display: flex;
   align-items: center;
-  gap: 1.6rem;
+  gap: 1rem;
   background-color: var(--color-light-2);
   border-radius: 5px;
   padding: 1.2rem 2rem;
@@ -274,6 +273,7 @@ main {
   cursor: pointer;
   text-decoration: none;
   color: inherit;
+  position: relative;
 }
 
 .cities h3 {
@@ -297,7 +297,6 @@ main {
 
 .countries li {
   text-align: center;
-  gap: .2rem;
   font-size: 1.7rem;
   font-weight: 600;
   background-color: var(--color-light-2);
@@ -334,7 +333,7 @@ main {
   font-size: 1.9rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: .7rem;
 }
 
 .city-details p {
@@ -417,6 +416,7 @@ main {
   gap: .5rem;
   font-size: 1.6rem;
   font-weight: 600;
+  position: relative;
 }
 
 .form-edit-city input,
@@ -427,4 +427,24 @@ main {
   border: none;
   border-radius: 5px;
   transition: all .2s;
+}
+
+.mr-05 {
+  margin-right: .5rem;
+}
+
+.mb--3px {
+  margin-bottom: -3px;
+}
+
+.pa {
+  position: absolute;
+}
+
+.r1 {
+  right: 1rem;
+}
+
+.t-3-5 {
+  top: 3.5rem;
 }

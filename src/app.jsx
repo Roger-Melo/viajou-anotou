@@ -10,6 +10,7 @@ import {
   useLoaderData,
   useOutletContext,
   useSearchParams,
+  useRouteError,
   RouterProvider,
   Route,
   NavLink,
@@ -36,7 +37,7 @@ const Header = () => {
   const isNotHomepage = location.pathname !== '/'
   return (
     <header>
-      <nav className="nav">
+      <nav className="nav pa">
         <Logo version={isNotHomepage ? 'dark' : 'light'} />
         <ul>
           {links.map(link => {
@@ -194,15 +195,21 @@ const AppLayout = () => {
   )
 }
 
+const CountryFlag = ({ country, className, width = 20, height = 15 }) => {
+  const src = `https://flagcdn.com/${width}x${height}/${country.code}.png`
+  return <img className={className} src={src} alt={country.name} />
+}
+
 const Cities = () => {
   const cities = useOutletContext()
   return cities.length === 0
     ? <p className="initial-message">Clique no mapa para adicionar uma cidade</p>
     : (
       <ul className="cities">
-        {cities.map(({ id, position, name }) =>
+        {cities.map(({ id, position, name, country }) =>
           <li key={id}>
             <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
+              <CountryFlag country={country} />
               <h3>{name}</h3>
             </Link>
           </li>
@@ -213,11 +220,19 @@ const Cities = () => {
 
 const Countries = () => {
   const cities = useOutletContext()
-  const groupedByCountry = Object.groupBy(cities, ({ country }) => country)
-  const countries = Object.keys(groupedByCountry)
+  const countries = cities.reduce((acc, city) => {
+    const duplicatedCountry = acc.some(accItem => accItem.name === city.country.name)
+    return duplicatedCountry ? acc : [...acc, city.country]
+  }, [])
+
   return (
     <ul className="countries">
-      {countries.map(country => <li key={country}>{country}</li>)}
+      {countries.map(country =>
+        <li key={country.name}>
+          <CountryFlag country={country} width={24} height={18} className="mr-05 mb--3px" />
+          {country.name}
+        </li>
+      )}
     </ul>
   )
 }
@@ -229,7 +244,7 @@ const TripDetails = () => {
   const city = cities.find(city => params.id === String(city.id))
   const handleClickBack = () => navigate('/app/cidades')
 
-  const deleteContact = e => {
+  const deleteTrip = e => {
     const wantToDelete = confirm('Por favor, confirme que você quer deletar essa viagem.')
     if (!wantToDelete) {
       e.preventDefault()
@@ -240,7 +255,10 @@ const TripDetails = () => {
     <div className="city-details">
       <div className="row">
         <h5>Nome da cidade</h5>
-        <h3>{city.name}</h3>
+        <h3>
+          <CountryFlag country={city.country} />
+          {city.name}
+        </h3>
       </div>
       <div className="row">
         <h5>Quando você foi para {city.name}?</h5>
@@ -255,7 +273,7 @@ const TripDetails = () => {
         <Form action="edit">
           <button className="btn-edit" type="submit">&there4; Editar</button>
         </Form>
-        <Form method="post" action="delete" onSubmit={deleteContact}>
+        <Form method="post" action="delete" onSubmit={deleteTrip}>
           <button className="btn-delete" type="submit">&times; Deletar</button>
         </Form>
       </div>
@@ -273,15 +291,15 @@ const cityLoader = async ({ request, params }) => {
   const [latitude, longitude] = ['latitude', 'longitude'].map(item => url.searchParams.get(item))
   const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
   const info = await response.json()
-  return { name: info.city, id: params.id }
+  return { name: info.city, id: params.id, country: { name: info.countryName, code: info.countryCode.toLowerCase() } }
 }
 
 const formAction = async ({ request, params }) => {
-  const formData = await request.formData()
+  const formData = Object.fromEntries(await request.formData())
   const cities = await localforage.getItem('cities')
   const cityInStorage = await localforage.getItem('cities').then(cities => cities?.find(city => city.id === params.id))
   if (cityInStorage) {
-    const city = { ...Object.fromEntries(formData), position: cityInStorage.position, id: cityInStorage.id, country: cityInStorage.country }
+    const city = { ...cityInStorage, ...formData }
     await localforage.setItem('cities', [...cities.filter(city => city.id !== params.id), city])
     return redirect(`/app/cidades/${params.id}`)
   }
@@ -290,7 +308,7 @@ const formAction = async ({ request, params }) => {
   const [latitude, longitude] = ['latitude', 'longitude'].map(item => url.searchParams.get(item))
   const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
   const info = await response.json()
-  const city = { ...Object.fromEntries(formData), position: { latitude, longitude }, id: params.id, country: info.countryName }
+  const city = { ...formData, position: { latitude, longitude }, id: params.id, country: { name: info.countryName, code: info.countryCode.toLowerCase() } }
   await localforage.setItem('cities', cities ? [...cities, city] : [city])
   return redirect(`/app/cidades/${params.id}`)
 }
@@ -304,6 +322,7 @@ const EditCity = () => {
       <label>
         <span>Nome da cidade</span>
         <input key={city.id} defaultValue={city.name} name="name" required />
+        <CountryFlag country={city.country} className="pa r1 t-3-5" />
       </label>
       <label>
         <span>Quando você foi para {city.name}?</span>
@@ -327,23 +346,43 @@ const deleteAction = async ({ params }) => {
   return redirect('/app/cidades')
 }
 
+const ErrorMessage = () => {
+  const error = useRouteError()
+  return (
+    <>
+      <Header />
+      <main className="main-not-found">
+        <section>
+          <div>
+            <h1>Opa!</h1>
+            <p>Desculpe, um erro inesperado aconteceu:</p>
+            <p><i>{error.message}</i></p>
+          </div>
+        </section>
+      </main>
+    </>
+  )
+}
+
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/">
-        <Route index element={<Home />} />
-        <Route path="sobre" element={<About />} />
-        <Route path="preco" element={<Pricing />} />
-        <Route path="login" element={<Login />} />
-        <Route path="app" element={<AppLayout />} loader={citiesLoader}>
-          <Route index element={<Navigate to="cidades" replace />} />
-          <Route path="cidades" element={<Cities />} />
-          <Route path="cidades/:id" element={<TripDetails />} />
-          <Route path="cidades/:id/edit" element={<EditCity />} loader={cityLoader} action={formAction} />
-          <Route path="cidades/:id/delete" action={deleteAction} />
-          <Route path="paises" element={<Countries />} />
+        <Route errorElement={<ErrorMessage />}>
+          <Route index element={<Home />} />
+          <Route path="sobre" element={<About />} />
+          <Route path="preco" element={<Pricing />} />
+          <Route path="login" element={<Login />} />
+          <Route path="app" element={<AppLayout />} loader={citiesLoader}>
+            <Route index element={<Navigate to="cidades" replace />} />
+            <Route path="cidades" element={<Cities />} />
+            <Route path="cidades/:id" element={<TripDetails />} />
+            <Route path="cidades/:id/edit" element={<EditCity />} loader={cityLoader} action={formAction} />
+            <Route path="cidades/:id/delete" action={deleteAction} />
+            <Route path="paises" element={<Countries />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
         </Route>
-        <Route path="*" element={<NotFound />} />
       </Route>
     )
   )
