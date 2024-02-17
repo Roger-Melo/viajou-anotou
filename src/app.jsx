@@ -160,11 +160,27 @@ const ChangeToClickedCity = () => {
 
 const curitibaPosition = { latitude: '-25.437370980404776', longitude: '-49.27058902123733' }
 
+const Map = ({ cities }) => {
+  const [searchParams] = useSearchParams()
+  const [latitude, longitude] = ['latitude', 'longitude'].map(item => searchParams.get(item))
+  return (
+    <div className="map">
+      <MapContainer className="map-container" center={[curitibaPosition.latitude, curitibaPosition.longitude]} zoom={11} scrollWheelZoom={true}>
+        <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {cities.map(({ id, position, name }) =>
+          <Marker key={id} position={[position.latitude, position.longitude]}>
+            <Popup>{name}</Popup>
+          </Marker>
+        )}
+        {latitude && longitude && <ChangeCenter position={[latitude, longitude]} />}
+        <ChangeToClickedCity />
+      </MapContainer>
+    </div>
+  )
+}
+
 const AppLayout = () => {
   const cities = useLoaderData()
-  const [searchParams] = useSearchParams()
-  const latitude = searchParams.get('latitude')
-  const longitude = searchParams.get('longitude')
   return (
     <main className="main-app-layout">
       <div className="sidebar">
@@ -179,18 +195,7 @@ const AppLayout = () => {
         </nav>
         <Outlet context={cities} />
       </div>
-      <div className="map">
-        <MapContainer className="map-container" center={[curitibaPosition.latitude, curitibaPosition.longitude]} zoom={11} scrollWheelZoom={true}>
-          <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {cities.map(({ id, position, name }) =>
-            <Marker key={id} position={[position.latitude, position.longitude]}>
-              <Popup>{name}</Popup>
-            </Marker>
-          )}
-          {latitude && longitude && <ChangeCenter position={[latitude, longitude]} />}
-          <ChangeToClickedCity />
-        </MapContainer>
-      </div>
+      <Map cities={cities} />
     </main>
   )
 }
