@@ -289,17 +289,26 @@ const TripDetails = () => {
 const fetchCity = id =>
   localforage.getItem('cities').then(cities => cities?.find(city => city.id === id))
 
+const fetchCityInfo = async request => {
+  const url = new URL(request.url)
+  const [latitude, longitude] = ['latitude', 'longitude'].map(item => url.searchParams.get(item))
+  const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
+  const { city, countryName, countryCode } = await response.json()
+  return {
+    name: city,
+    country: { name: countryName, code: countryCode.toLowerCase() },
+    position: { latitude, longitude }
+  }
+}
+
 const cityLoader = async ({ request, params }) => {
   const cityInStorage = await fetchCity(params.id)
   if (cityInStorage) {
     return cityInStorage
   }
 
-  const url = new URL(request.url)
-  const [latitude, longitude] = ['latitude', 'longitude'].map(item => url.searchParams.get(item))
-  const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
-  const info = await response.json()
-  return { name: info.city, id: params.id, country: { name: info.countryName, code: info.countryCode.toLowerCase() } }
+  const cityInfo = await fetchCityInfo(request)
+  return { ...cityInfo, id: params.id }
 }
 
 const formAction = async ({ request, params }) => {
@@ -312,11 +321,8 @@ const formAction = async ({ request, params }) => {
     return redirect(`/app/cidades/${params.id}`)
   }
 
-  const url = new URL(request.url)
-  const [latitude, longitude] = ['latitude', 'longitude'].map(item => url.searchParams.get(item))
-  const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
-  const info = await response.json()
-  const city = { ...formData, position: { latitude, longitude }, id: params.id, country: { name: info.countryName, code: info.countryCode.toLowerCase() } }
+  const cityInfo = await fetchCityInfo(request)
+  const city = { id: params.id, ...cityInfo, ...formData }
   await localforage.setItem('cities', cities ? [...cities, city] : [city])
   return redirect(`/app/cidades/${params.id}`)
 }
