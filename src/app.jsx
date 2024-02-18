@@ -286,8 +286,11 @@ const TripDetails = () => {
   )
 }
 
+const fetchCity = id =>
+  localforage.getItem('cities').then(cities => cities?.find(city => city.id === id))
+
 const cityLoader = async ({ request, params }) => {
-  const cityInStorage = await localforage.getItem('cities').then(cities => cities?.find(city => city.id === params.id))
+  const cityInStorage = await fetchCity(params.id)
   if (cityInStorage) {
     return cityInStorage
   }
@@ -302,7 +305,7 @@ const cityLoader = async ({ request, params }) => {
 const formAction = async ({ request, params }) => {
   const formData = Object.fromEntries(await request.formData())
   const cities = await localforage.getItem('cities')
-  const cityInStorage = await localforage.getItem('cities').then(cities => cities?.find(city => city.id === params.id))
+  const cityInStorage = await fetchCity(params.id)
   if (cityInStorage) {
     const city = { ...cityInStorage, ...formData }
     await localforage.setItem('cities', [...cities.filter(city => city.id !== params.id), city])
