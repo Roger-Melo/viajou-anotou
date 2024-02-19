@@ -295,6 +295,7 @@ const fetchCityInfo = async request => {
   const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=pt-BR`)
   const { city, countryName, countryCode } = await response.json()
   return {
+    id: request.url.split('/')[5],
     name: city,
     country: { name: countryName, code: countryCode.toLowerCase() },
     position: { latitude, longitude }
@@ -307,24 +308,24 @@ const cityLoader = async ({ request, params }) => {
     return cityInStorage
   }
 
-  const cityInfo = await fetchCityInfo(request)
-  return { ...cityInfo, id: params.id }
+  return fetchCityInfo(request)
 }
 
 const formAction = async ({ request, params }) => {
   const formData = Object.fromEntries(await request.formData())
   const cities = await localforage.getItem('cities')
+  const cityDetailsRoute = `/app/cidades/${params.id}`
   const cityInStorage = await fetchCity(params.id)
   if (cityInStorage) {
     const city = { ...cityInStorage, ...formData }
     await localforage.setItem('cities', [...cities.filter(city => city.id !== params.id), city])
-    return redirect(`/app/cidades/${params.id}`)
+    return redirect(cityDetailsRoute)
   }
 
   const cityInfo = await fetchCityInfo(request)
-  const city = { id: params.id, ...cityInfo, ...formData }
+  const city = { ...cityInfo, ...formData }
   await localforage.setItem('cities', cities ? [...cities, city] : [city])
-  return redirect(`/app/cidades/${params.id}`)
+  return redirect(cityDetailsRoute)
 }
 
 const EditCity = () => {
