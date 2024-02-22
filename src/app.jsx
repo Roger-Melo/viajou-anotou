@@ -120,26 +120,24 @@ const Login = () =>
     <Header />
     <main className="main-login">
       <section>
-        <form className="form-login">
+        <Form method="post" className="form-login">
           <div className="row">
             <label>
               Email
-              <input type="email" defaultValue="oi@joaquim.com" />
-            </label>
-          </div>
-          <div className="row">
-            <label>
-              Senha
-              <input type="password" defaultValue="abc123" />
+              <input name="email" type="email" defaultValue="oi@joaquim.com" required />
             </label>
           </div>
           <button>Login</button>
-        </form>
+        </Form>
       </section>
     </main>
   </>
 
-const citiesLoader = async () => {
+const appLoader = async () => {
+  if (!fakeAuthProvider.isAuthenticated) {
+    return redirect('/login')
+  }
+
   const cities = await localforage.getItem('cities')
   return cities ?? []
 }
@@ -179,6 +177,11 @@ const Map = ({ cities }) => {
   )
 }
 
+const logoutAction = async () => {
+  await fakeAuthProvider.signOut()
+  return redirect('/')
+}
+
 const AppLayout = () => {
   const cities = useLoaderData()
   return (
@@ -196,6 +199,9 @@ const AppLayout = () => {
         <Outlet context={cities} />
       </div>
       <Map cities={cities} />
+      <Form method="post" action="/logout">
+        <button className="btn-logout">Logout</button>
+      </Form>
     </main>
   )
 }
@@ -379,6 +385,41 @@ const ErrorMessage = () => {
   )
 }
 
+const fakeAuthProvider = {
+  isAuthenticated: false,
+  email: null,
+  signIn: async function (email) {
+    await new Promise(resolve => setTimeout(resolve, 500))
+    this.isAuthenticated = true
+    this.email = email
+  },
+  signOut: async function () {
+    await new Promise(resolve => setTimeout(resolve, 500))
+    this.isAuthenticated = false
+    this.email = null
+  }
+}
+
+const loginAction = async ({ request }) => {
+  const { email } = Object.fromEntries(await request.formData())
+
+  try {
+    await fakeAuthProvider.signIn(email)
+  } catch (error) {
+    return { error: 'Não foi possível fazer login. Por favor, tente novamente' }
+  }
+
+  return redirect('/app')
+}
+
+const loginLoader = async () => {
+  if (!fakeAuthProvider.isAuthenticated) {
+    return null
+  }
+
+  return redirect('/app')
+}
+
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -387,8 +428,9 @@ const App = () => {
           <Route index element={<Home />} />
           <Route path="sobre" element={<About />} />
           <Route path="preco" element={<Pricing />} />
-          <Route path="login" element={<Login />} />
-          <Route path="app" element={<AppLayout />} loader={citiesLoader}>
+          <Route path="login" element={<Login />} loader={loginLoader} action={loginAction} />
+          <Route path="logout" action={logoutAction} />
+          <Route path="app" element={<AppLayout />} loader={appLoader}>
             <Route index element={<Navigate to="cidades" replace />} />
             <Route path="cidades" element={<Cities />} />
             <Route path="cidades/:id" element={<TripDetails />} />

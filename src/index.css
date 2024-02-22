@@ -448,3 +448,10 @@ main {
 .t-3-5 {
   top: 3.5rem;
 }
+
+.btn-logout {
+  z-index: 999;
+  position: absolute;
+  top: 4rem;
+  right: 4rem;
+}
