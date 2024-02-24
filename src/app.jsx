@@ -11,6 +11,7 @@ import {
   useOutletContext,
   useSearchParams,
   useRouteError,
+  useActionData,
   RouterProvider,
   Route,
   NavLink,
@@ -115,23 +116,28 @@ const NotFound = () =>
     </main>
   </>
 
-const Login = () =>
-  <>
-    <Header />
-    <main className="main-login">
-      <section>
-        <Form method="post" className="form-login">
-          <div className="row">
-            <label>
-              Email
-              <input name="email" type="email" defaultValue="oi@joaquim.com" required />
-            </label>
-          </div>
-          <button>Login</button>
-        </Form>
-      </section>
-    </main>
-  </>
+const Login = () => {
+  const actionData = useActionData()
+  return (
+    <>
+      <Header />
+      <main className="main-login">
+        <section>
+          <Form method="post" className="form-login">
+            <div className="row">
+              <label>
+                Email
+                <input name="email" type="email" defaultValue="oi@joaquim.com" required />
+              </label>
+            </div>
+            <button>Login</button>
+            {actionData && actionData.error ? <p style={{ color: 'red' }}>{actionData.error}</p> : null}
+          </Form>
+        </section>
+      </main>
+    </>
+  )
+}
 
 const appLoader = async () => {
   if (!fakeAuthProvider.isAuthenticated) {
@@ -402,6 +408,10 @@ const fakeAuthProvider = {
 
 const loginAction = async ({ request }) => {
   const { email } = Object.fromEntries(await request.formData())
+
+  if (email.length < 4) {
+    return { error: 'O email não pode ter menos de 4 caracteres' }
+  }
 
   try {
     await fakeAuthProvider.signIn(email)
