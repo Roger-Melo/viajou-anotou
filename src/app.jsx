@@ -439,31 +439,29 @@ const loginLoader = async () => {
   return redirect('/app')
 }
 
-const App = () => {
-  const router = createBrowserRouter(
-    createRoutesFromElements(
-      <Route path="/">
-        <Route errorElement={<ErrorMessage />}>
-          <Route index element={<Home />} />
-          <Route path="sobre" element={<About />} />
-          <Route path="preco" element={<Pricing />} />
-          <Route path="login" element={<Login />} loader={loginLoader} action={loginAction} />
-          <Route path="logout" action={logoutAction} />
-          <Route path="app" element={<AppLayout />} loader={appLoader}>
-            <Route index element={<Navigate to="cidades" replace />} />
-            <Route path="cidades" element={<Cities />} />
-            <Route path="cidades/:id" element={<TripDetails />} />
-            <Route path="cidades/:id/edit" element={<EditCity />} loader={cityLoader} action={formAction} />
-            <Route path="cidades/:id/delete" action={deleteAction} />
-            <Route path="paises" element={<Countries />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/">
+      <Route errorElement={<ErrorMessage />}>
+        <Route index element={<Home />} />
+        <Route path="sobre" element={<About />} />
+        <Route path="preco" element={<Pricing />} />
+        <Route path="login" element={<Login />} loader={loginLoader} action={loginAction} />
+        <Route path="logout" action={logoutAction} />
+        <Route path="app" element={<AppLayout />} loader={appLoader}>
+          <Route index element={<Navigate to="cidades" replace />} />
+          <Route path="cidades" element={<Cities />} />
+          <Route path="cidades/:id" element={<TripDetails />} />
+          <Route path="cidades/:id/edit" element={<EditCity />} loader={cityLoader} action={formAction} />
+          <Route path="cidades/:id/delete" action={deleteAction} />
+          <Route path="paises" element={<Countries />} />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Route>
-    )
+    </Route>
   )
+)
 
-  return <RouterProvider router={router} />
-}
+const App = () => <RouterProvider router={router} />
 
 export { App }
