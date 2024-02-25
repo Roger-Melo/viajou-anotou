@@ -217,17 +217,26 @@ const CountryFlag = ({ country, className, width = 20, height = 15 }) => {
   return <img className={className} src={src} alt={country.name} />
 }
 
+const removeZero = string => string[0] === '0' ? string[1] : string
+
+const getFormattedDate = dateString => {
+  const [year, month, day] = dateString.split('-')
+  const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+  return `${removeZero(day)} de ${months[+removeZero(month) - 1]} de ${year}`
+}
+
 const Cities = () => {
   const cities = useOutletContext()
   return cities.length === 0
     ? <p className="initial-message">Clique no mapa para adicionar uma cidade</p>
     : (
       <ul className="cities">
-        {cities.map(({ id, position, name, country }) =>
+        {cities.map(({ id, position, name, country, date }) =>
           <li key={id}>
             <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
               <CountryFlag country={country} />
               <h3>{name}</h3>
+              <h4>{getFormattedDate(date)}</h4>
             </Link>
           </li>
         )}
@@ -279,7 +288,7 @@ const TripDetails = () => {
       </div>
       <div className="row">
         <h5>Quando você foi para {city.name}?</h5>
-        <p>{city.date}</p>
+        <p>{getFormattedDate(city.date)}</p>
       </div>
       <div className="row">
         <h5>Suas anotações</h5>
