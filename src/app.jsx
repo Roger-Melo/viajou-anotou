@@ -307,7 +307,7 @@ const TripDetails = () => {
   )
 }
 
-const fetchCity = id =>
+const fetchCityInDb = id =>
   localforage.getItem('cities').then(cities => cities?.find(city => city.id === id))
 
 const fetchCityInfo = async request => {
@@ -324,9 +324,9 @@ const fetchCityInfo = async request => {
 }
 
 const cityLoader = async ({ request, params }) => {
-  const cityInStorage = await fetchCity(params.id)
-  if (cityInStorage) {
-    return cityInStorage
+  const cityInDb = await fetchCityInDb(params.id)
+  if (cityInDb) {
+    return cityInDb
   }
 
   return fetchCityInfo(request)
@@ -336,9 +336,9 @@ const formAction = async ({ request, params }) => {
   const formData = Object.fromEntries(await request.formData())
   const cities = await localforage.getItem('cities')
   const cityDetailsRoute = `/app/cidades/${params.id}`
-  const cityInStorage = await fetchCity(params.id)
-  if (cityInStorage) {
-    const city = { ...cityInStorage, ...formData }
+  const cityInDb = await fetchCityInDb(params.id)
+  if (cityInDb) {
+    const city = { ...cityInDb, ...formData }
     await localforage.setItem('cities', [...cities.filter(city => city.id !== params.id), city])
     return redirect(cityDetailsRoute)
   }
