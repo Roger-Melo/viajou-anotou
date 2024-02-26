@@ -11,6 +11,7 @@ import {
   useOutletContext,
   useSearchParams,
   useRouteError,
+  useActionData,
   RouterProvider,
   Route,
   NavLink,
@@ -115,31 +116,34 @@ const NotFound = () =>
     </main>
   </>
 
-const Login = () =>
-  <>
-    <Header />
-    <main className="main-login">
-      <section>
-        <form className="form-login">
-          <div className="row">
-            <label>
-              Email
-              <input type="email" defaultValue="oi@joaquim.com" />
-            </label>
-          </div>
-          <div className="row">
-            <label>
-              Senha
-              <input type="password" defaultValue="abc123" />
-            </label>
-          </div>
-          <button>Login</button>
-        </form>
-      </section>
-    </main>
-  </>
+const Login = () => {
+  const actionData = useActionData()
+  return (
+    <>
+      <Header />
+      <main className="main-login">
+        <section>
+          <Form method="post" className="form-login" replace>
+            <div className="row">
+              <label>
+                Email
+                <input name="email" type="email" defaultValue="oi@joaquim.com" required />
+              </label>
+            </div>
+            <button>Login</button>
+            {actionData && actionData.error ? <p style={{ color: 'red' }}>{actionData.error}</p> : null}
+          </Form>
+        </section>
+      </main>
+    </>
+  )
+}
 
-const citiesLoader = async () => {
+const appLoader = async () => {
+  if (!fakeAuthProvider.isAuthenticated) {
+    return redirect('/login')
+  }
+
   const cities = await localforage.getItem('cities')
   return cities ?? []
 }
@@ -179,6 +183,11 @@ const Map = ({ cities }) => {
   )
 }
 
+const logoutAction = async () => {
+  await fakeAuthProvider.signOut()
+  return redirect('/')
+}
+
 const AppLayout = () => {
   const cities = useLoaderData()
   return (
@@ -196,6 +205,9 @@ const AppLayout = () => {
         <Outlet context={cities} />
       </div>
       <Map cities={cities} />
+      <Form method="post" action="/logout">
+        <button className="btn-logout">Logout</button>
+      </Form>
     </main>
   )
 }
@@ -205,17 +217,26 @@ const CountryFlag = ({ country, className, width = 20, height = 15 }) => {
   return <img className={className} src={src} alt={country.name} />
 }
 
+const removeZero = string => string[0] === '0' ? string[1] : string
+
+const getFormattedDate = dateString => {
+  const [year, month, day] = dateString.split('-')
+  const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+  return `${removeZero(day)} de ${months[+removeZero(month) - 1]} de ${year}`
+}
+
 const Cities = () => {
   const cities = useOutletContext()
   return cities.length === 0
     ? <p className="initial-message">Clique no mapa para adicionar uma cidade</p>
     : (
       <ul className="cities">
-        {cities.map(({ id, position, name, country }) =>
+        {cities.map(({ id, position, name, country, date }) =>
           <li key={id}>
             <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
               <CountryFlag country={country} />
               <h3>{name}</h3>
+              <h4>{getFormattedDate(date)}</h4>
             </Link>
           </li>
         )}
@@ -267,7 +288,7 @@ const TripDetails = () => {
       </div>
       <div className="row">
         <h5>Quando você foi para {city.name}?</h5>
-        <p>{city.date}</p>
+        <p>{getFormattedDate(city.date)}</p>
       </div>
       <div className="row">
         <h5>Suas anotações</h5>
@@ -286,7 +307,7 @@ const TripDetails = () => {
   )
 }
 
-const fetchCity = id =>
+const fetchCityInDb = id =>
   localforage.getItem('cities').then(cities => cities?.find(city => city.id === id))
 
 const fetchCityInfo = async request => {
@@ -303,9 +324,9 @@ const fetchCityInfo = async request => {
 }
 
 const cityLoader = async ({ request, params }) => {
-  const cityInStorage = await fetchCity(params.id)
-  if (cityInStorage) {
-    return cityInStorage
+  const cityInDb = await fetchCityInDb(params.id)
+  if (cityInDb) {
+    return cityInDb
   }
 
   return fetchCityInfo(request)
@@ -315,9 +336,9 @@ const formAction = async ({ request, params }) => {
   const formData = Object.fromEntries(await request.formData())
   const cities = await localforage.getItem('cities')
   const cityDetailsRoute = `/app/cidades/${params.id}`
-  const cityInStorage = await fetchCity(params.id)
-  if (cityInStorage) {
-    const city = { ...cityInStorage, ...formData }
+  const cityInDb = await fetchCityInDb(params.id)
+  if (cityInDb) {
+    const city = { ...cityInDb, ...formData }
     await localforage.setItem('cities', [...cities.filter(city => city.id !== params.id), city])
     return redirect(cityDetailsRoute)
   }
@@ -379,30 +400,68 @@ const ErrorMessage = () => {
   )
 }
 
-const App = () => {
-  const router = createBrowserRouter(
-    createRoutesFromElements(
-      <Route path="/">
-        <Route errorElement={<ErrorMessage />}>
-          <Route index element={<Home />} />
-          <Route path="sobre" element={<About />} />
-          <Route path="preco" element={<Pricing />} />
-          <Route path="login" element={<Login />} />
-          <Route path="app" element={<AppLayout />} loader={citiesLoader}>
-            <Route index element={<Navigate to="cidades" replace />} />
-            <Route path="cidades" element={<Cities />} />
-            <Route path="cidades/:id" element={<TripDetails />} />
-            <Route path="cidades/:id/edit" element={<EditCity />} loader={cityLoader} action={formAction} />
-            <Route path="cidades/:id/delete" action={deleteAction} />
-            <Route path="paises" element={<Countries />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Route>
-    )
-  )
-
-  return <RouterProvider router={router} />
+const fakeAuthProvider = {
+  isAuthenticated: false,
+  email: null,
+  signIn: async function (email) {
+    await new Promise(resolve => setTimeout(resolve, 500))
+    this.isAuthenticated = true
+    this.email = email
+  },
+  signOut: async function () {
+    await new Promise(resolve => setTimeout(resolve, 500))
+    this.isAuthenticated = false
+    this.email = null
+  }
 }
+
+const loginAction = async ({ request }) => {
+  const { email } = Object.fromEntries(await request.formData())
+
+  if (email.length < 4) {
+    return { error: 'O email não pode ter menos de 4 caracteres' }
+  }
+
+  try {
+    await fakeAuthProvider.signIn(email)
+  } catch (error) {
+    return { error: 'Não foi possível fazer login. Por favor, tente novamente' }
+  }
+
+  return redirect('/app')
+}
+
+const loginLoader = async () => {
+  if (!fakeAuthProvider.isAuthenticated) {
+    return null
+  }
+
+  return redirect('/app')
+}
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/">
+      <Route errorElement={<ErrorMessage />}>
+        <Route index element={<Home />} />
+        <Route path="sobre" element={<About />} />
+        <Route path="preco" element={<Pricing />} />
+        <Route path="login" element={<Login />} loader={loginLoader} action={loginAction} />
+        <Route path="logout" action={logoutAction} />
+        <Route path="app" element={<AppLayout />} loader={appLoader}>
+          <Route index element={<Navigate to="cidades" replace />} />
+          <Route path="cidades" element={<Cities />} />
+          <Route path="cidades/:id" element={<TripDetails />} />
+          <Route path="cidades/:id/edit" element={<EditCity />} loader={cityLoader} action={formAction} />
+          <Route path="cidades/:id/delete" action={deleteAction} />
+          <Route path="paises" element={<Countries />} />
+        </Route>
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Route>
+  )
+)
+
+const App = () => <RouterProvider router={router} />
 
 export { App }
