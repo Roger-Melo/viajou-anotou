@@ -14,8 +14,8 @@ import {
   Navigate,
   Form
 } from 'react-router-dom'
-import { fakeAuthProvider } from '@/resources/services/auth/fake-auth-provider'
 import { AppLayout } from '@/layouts/app-layout'
+import { appLoader } from '@/layouts/app-loader'
 import { loginLoader } from '@/pages/login-loader'
 import { loginAction } from '@/pages/login-action'
 import { logoutAction } from '@/pages/logout-action'
@@ -37,15 +37,6 @@ const NotFound = () =>
       </section>
     </main>
   </>
-
-const appLoader = async () => {
-  if (!fakeAuthProvider.isAuthenticated) {
-    return redirect('/login')
-  }
-
-  const cities = await localforage.getItem('cities')
-  return cities ?? []
-}
 
 const CountryFlag = ({ country, className, width = 20, height = 15 }) => {
   const src = `https://flagcdn.com/${width}x${height}/${country.code}.png`
