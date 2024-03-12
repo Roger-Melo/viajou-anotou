@@ -23,7 +23,10 @@ import { Home } from '@/pages/home'
 import { About } from '@/pages/about'
 import { Pricing } from '@/pages/pricing'
 import { Login } from '@/pages/login'
+import { Cities } from '@/pages/cities'
 import { Header } from '@/ui/header'
+import { CountryFlag } from '@/ui/country-flag'
+import { getFormattedDate } from '@/resources/utils/get-formatted-date'
 
 const NotFound = () =>
   <>
@@ -37,38 +40,6 @@ const NotFound = () =>
       </section>
     </main>
   </>
-
-const CountryFlag = ({ country, className, width = 20, height = 15 }) => {
-  const src = `https://flagcdn.com/${width}x${height}/${country.code}.png`
-  return <img className={className} src={src} alt={country.name} />
-}
-
-const removeZero = string => string[0] === '0' ? string[1] : string
-
-const getFormattedDate = dateString => {
-  const [year, month, day] = dateString.split('-')
-  const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-  return `${removeZero(day)} de ${months[+removeZero(month) - 1]} de ${year}`
-}
-
-const Cities = () => {
-  const cities = useOutletContext()
-  return cities.length === 0
-    ? <p className="initial-message">Clique no mapa para adicionar uma cidade</p>
-    : (
-      <ul className="cities">
-        {cities.map(({ id, position, name, country, date }) =>
-          <li key={id}>
-            <Link to={`${id}?latitude=${position.latitude}&longitude=${position.longitude}`}>
-              <CountryFlag country={country} />
-              <h3>{name}</h3>
-              <h4>{getFormattedDate(date)}</h4>
-            </Link>
-          </li>
-        )}
-      </ul>
-    )
-}
 
 const Countries = () => {
   const cities = useOutletContext()
