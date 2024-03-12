@@ -10,7 +10,6 @@ import {
   useOutletContext,
   useSearchParams,
   useRouteError,
-  useActionData,
   RouterProvider,
   Route,
   NavLink,
@@ -19,9 +18,13 @@ import {
   Navigate,
   Form
 } from 'react-router-dom'
+import { fakeAuthProvider } from '@/resources/services/auth/fake-auth-provider'
+import { loginLoader } from '@/pages/login-loader'
+import { loginAction } from '@/pages/login-action'
 import { Home } from '@/pages/home'
 import { About } from '@/pages/about'
 import { Pricing } from '@/pages/pricing'
+import { Login } from '@/pages/login'
 import { Header } from '@/ui/header'
 import { Logo } from '@/ui/logo'
 
@@ -37,29 +40,6 @@ const NotFound = () =>
       </section>
     </main>
   </>
-
-const Login = () => {
-  const actionData = useActionData()
-  return (
-    <>
-      <Header />
-      <main className="main-login">
-        <section>
-          <Form method="post" className="form-login" replace>
-            <div className="row">
-              <label>
-                Email
-                <input name="email" type="email" defaultValue="oi@joaquim.com" required />
-              </label>
-            </div>
-            <button>Login</button>
-            {actionData && actionData.error ? <p style={{ color: 'red' }}>{actionData.error}</p> : null}
-          </Form>
-        </section>
-      </main>
-    </>
-  )
-}
 
 const appLoader = async () => {
   if (!fakeAuthProvider.isAuthenticated) {
@@ -320,45 +300,6 @@ const ErrorMessage = () => {
       </main>
     </>
   )
-}
-
-const fakeAuthProvider = {
-  isAuthenticated: false,
-  email: null,
-  signIn: async function (email) {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    this.isAuthenticated = true
-    this.email = email
-  },
-  signOut: async function () {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    this.isAuthenticated = false
-    this.email = null
-  }
-}
-
-const loginAction = async ({ request }) => {
-  const { email } = Object.fromEntries(await request.formData())
-
-  if (email.length < 4) {
-    return { error: 'O email não pode ter menos de 4 caracteres' }
-  }
-
-  try {
-    await fakeAuthProvider.signIn(email)
-  } catch (error) {
-    return { error: 'Não foi possível fazer login. Por favor, tente novamente' }
-  }
-
-  return redirect('/app')
-}
-
-const loginLoader = async () => {
-  if (!fakeAuthProvider.isAuthenticated) {
-    return null
-  }
-
-  return redirect('/app')
 }
 
 const router = createBrowserRouter(
