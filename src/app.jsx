@@ -1,7 +1,6 @@
 import {
   createBrowserRouter,
   createRoutesFromElements,
-  useOutletContext,
   useRouteError,
   RouterProvider,
   Route,
@@ -23,8 +22,8 @@ import { Login } from '@/pages/login'
 import { Cities } from '@/pages/cities'
 import { TripDetails } from '@/pages/trip-details'
 import { EditCity } from '@/pages/edit-city'
+import { Countries } from '@/pages/countries'
 import { Header } from '@/ui/header'
-import { CountryFlag } from '@/ui/country-flag'
 
 const NotFound = () =>
   <>
@@ -38,25 +37,6 @@ const NotFound = () =>
       </section>
     </main>
   </>
-
-const Countries = () => {
-  const cities = useOutletContext()
-  const countries = cities.reduce((acc, city) => {
-    const duplicatedCountry = acc.some(accItem => accItem.name === city.country.name)
-    return duplicatedCountry ? acc : [...acc, city.country]
-  }, [])
-
-  return (
-    <ul className="countries">
-      {countries.map(country =>
-        <li key={country.name}>
-          <CountryFlag country={country} width={24} height={18} className="mr-05 mb--3px" />
-          {country.name}
-        </li>
-      )}
-    </ul>
-  )
-}
 
 const ErrorMessage = () => {
   const error = useRouteError()
