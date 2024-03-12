@@ -1,8 +1,6 @@
-import localforage from 'localforage'
 import {
   createBrowserRouter,
   createRoutesFromElements,
-  redirect,
   useOutletContext,
   useRouteError,
   RouterProvider,
@@ -17,6 +15,7 @@ import { loginAction } from '@/pages/login-action'
 import { logoutAction } from '@/pages/logout-action'
 import { editCityLoader } from '@/pages/edit-city-loader'
 import { editCityAction } from '@/pages/edit-city-action'
+import { deleteCityAction } from '@/pages/delete-city-action'
 import { Home } from '@/pages/home'
 import { About } from '@/pages/about'
 import { Pricing } from '@/pages/pricing'
@@ -59,12 +58,6 @@ const Countries = () => {
   )
 }
 
-const deleteAction = async ({ params }) => {
-  const cities = await localforage.getItem('cities')
-  await localforage.setItem('cities', cities ? cities.filter(city => city.id !== params.id) : [])
-  return redirect('/app/cidades')
-}
-
 const ErrorMessage = () => {
   const error = useRouteError()
   return (
@@ -97,7 +90,7 @@ const router = createBrowserRouter(
           <Route path="cidades" element={<Cities />} />
           <Route path="cidades/:id" element={<TripDetails />} />
           <Route path="cidades/:id/edit" element={<EditCity />} loader={editCityLoader} action={editCityAction} />
-          <Route path="cidades/:id/delete" action={deleteAction} />
+          <Route path="cidades/:id/delete" action={deleteCityAction} />
           <Route path="paises" element={<Countries />} />
         </Route>
         <Route path="*" element={<NotFound />} />
