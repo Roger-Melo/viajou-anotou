@@ -21,6 +21,7 @@ import {
 import { fakeAuthProvider } from '@/resources/services/auth/fake-auth-provider'
 import { loginLoader } from '@/pages/login-loader'
 import { loginAction } from '@/pages/login-action'
+import { logoutAction } from '@/pages/logout-action'
 import { Home } from '@/pages/home'
 import { About } from '@/pages/about'
 import { Pricing } from '@/pages/pricing'
@@ -83,11 +84,6 @@ const Map = ({ cities }) => {
       </MapContainer>
     </div>
   )
-}
-
-const logoutAction = async () => {
-  await fakeAuthProvider.signOut()
-  return redirect('/')
 }
 
 const AppLayout = () => {
