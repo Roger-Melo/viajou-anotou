@@ -1,11 +1,4 @@
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  useRouteError,
-  RouterProvider,
-  Route,
-  Navigate
-} from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route, Navigate } from 'react-router-dom'
 import { AppLayout } from '@/layouts/app-layout'
 import { appLoader } from '@/layouts/app-loader'
 import { loginLoader } from '@/pages/login-loader'
@@ -14,6 +7,7 @@ import { logoutAction } from '@/pages/logout-action'
 import { editCityLoader } from '@/pages/edit-city-loader'
 import { editCityAction } from '@/pages/edit-city-action'
 import { deleteCityAction } from '@/pages/delete-city-action'
+import { ErrorMessage } from '@/pages/error-message'
 import { Home } from '@/pages/home'
 import { About } from '@/pages/about'
 import { Pricing } from '@/pages/pricing'
@@ -23,25 +17,6 @@ import { TripDetails } from '@/pages/trip-details'
 import { EditCity } from '@/pages/edit-city'
 import { Countries } from '@/pages/countries'
 import { NotFound } from '@/pages/not-found'
-import { Header } from '@/ui/header'
-
-const ErrorMessage = () => {
-  const error = useRouteError()
-  return (
-    <>
-      <Header />
-      <main className="main-not-found">
-        <section>
-          <div>
-            <h1>Opa!</h1>
-            <p>Desculpe, um erro inesperado aconteceu:</p>
-            <p><i>{error.message}</i></p>
-          </div>
-        </section>
-      </main>
-    </>
-  )
-}
 
 const router = createBrowserRouter(
   createRoutesFromElements(
