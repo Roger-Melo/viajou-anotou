@@ -2,7 +2,7 @@ import { useParams, useNavigate, useOutletContext, Form } from 'react-router-dom
 import { CountryFlag } from '@/ui/country-flag'
 import { getFormattedDate } from '@/resources/utils/get-formatted-date'
 
-const TripDetails = () => {
+const Component = () => {
   const params = useParams()
   const navigate = useNavigate()
   const cities = useOutletContext()
@@ -46,4 +46,6 @@ const TripDetails = () => {
   )
 }
 
-export { TripDetails }
+Component.displayName = 'TripDetails'
+
+export { Component }

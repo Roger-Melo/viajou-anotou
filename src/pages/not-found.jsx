@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Header } from '@/ui/header'
 
-const NotFound = () =>
+const Component = () =>
   <>
     <Header />
     <main className="main-not-found">
@@ -14,4 +14,6 @@ const NotFound = () =>
     </main>
   </>
 
-export { NotFound }
+Component.displayName = 'NotFound'
+
+export { Component }

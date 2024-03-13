@@ -2,7 +2,7 @@ import { useOutletContext, Link } from 'react-router-dom'
 import { CountryFlag } from '@/ui/country-flag'
 import { getFormattedDate } from '@/resources/utils/get-formatted-date'
 
-const Cities = () => {
+const Component = () => {
   const cities = useOutletContext()
   return cities.length === 0
     ? <p className="initial-message">Clique no mapa para adicionar uma cidade</p>
@@ -21,4 +21,6 @@ const Cities = () => {
     )
 }
 
-export { Cities }
+Component.displayName = 'Cities'
+
+export { Component }

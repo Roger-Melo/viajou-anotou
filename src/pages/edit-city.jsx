@@ -1,7 +1,7 @@
 import { useLoaderData, useNavigate, Form } from 'react-router-dom'
 import { CountryFlag } from '@/ui/country-flag'
 
-const EditCity = () => {
+const Component = () => {
   const city = useLoaderData()
   const navigate = useNavigate()
   const handleClickBack = () => navigate('/app/cidades')
@@ -28,4 +28,6 @@ const EditCity = () => {
   )
 }
 
-export { EditCity }
+Component.displayName = 'EditCity'
+
+export { Component }

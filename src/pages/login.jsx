@@ -1,7 +1,7 @@
 import { useActionData, Form } from 'react-router-dom'
 import { Header } from '@/ui/header'
 
-const Login = () => {
+const Component = () => {
   const actionData = useActionData()
   return (
     <>
@@ -24,4 +24,6 @@ const Login = () => {
   )
 }
 
-export { Login }
+Component.displayName = 'Login'
+
+export { Component }

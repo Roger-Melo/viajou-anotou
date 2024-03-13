@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { CountryFlag } from '@/ui/country-flag'
 
-const Countries = () => {
+const Component = () => {
   const cities = useOutletContext()
   const countries = cities.reduce((acc, city) => {
     const duplicatedCountry = acc.some(accItem => accItem.name === city.country.name)
@@ -20,4 +20,6 @@ const Countries = () => {
   )
 }
 
-export { Countries }
+Component.displayName = 'Countries'
+
+export { Component }

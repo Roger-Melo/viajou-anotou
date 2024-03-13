@@ -1,6 +1,6 @@
 import { Header } from '@/ui/header'
 
-const About = () =>
+const Component = () =>
   <>
     <Header />
     <main className="main-about">
@@ -15,4 +15,6 @@ const About = () =>
     </main>
   </>
 
-export { About }
+Component.displayName = 'About'
+
+export { Component }

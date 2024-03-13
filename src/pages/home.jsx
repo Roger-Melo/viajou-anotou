@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Header } from '@/ui/header'
 
-const Home = () =>
+const Component = () =>
   <>
     <Header />
     <main className="main-home">
@@ -13,4 +13,6 @@ const Home = () =>
     </main>
   </>
 
-export { Home }
+Component.displayName = 'Home'
+
+export { Component }
