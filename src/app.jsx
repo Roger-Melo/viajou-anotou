@@ -4,7 +4,6 @@ import {
   useRouteError,
   RouterProvider,
   Route,
-  Link,
   Navigate
 } from 'react-router-dom'
 import { AppLayout } from '@/layouts/app-layout'
@@ -23,20 +22,8 @@ import { Cities } from '@/pages/cities'
 import { TripDetails } from '@/pages/trip-details'
 import { EditCity } from '@/pages/edit-city'
 import { Countries } from '@/pages/countries'
+import { NotFound } from '@/pages/not-found'
 import { Header } from '@/ui/header'
-
-const NotFound = () =>
-  <>
-    <Header />
-    <main className="main-not-found">
-      <section>
-        <div>
-          <h1>Página não encontrada</h1>
-          <p>Volte para a <Link to="/">página inicial</Link></p>
-        </div>
-      </section>
-    </main>
-  </>
 
 const ErrorMessage = () => {
   const error = useRouteError()
