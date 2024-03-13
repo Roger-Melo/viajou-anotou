@@ -1,5 +1,4 @@
 import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route, Navigate } from 'react-router-dom'
-import { AppLayout } from '@/layouts/app-layout'
 import { appLoader } from '@/layouts/app-loader'
 import { loginLoader } from '@/pages/login-loader'
 import { loginAction } from '@/pages/login-action'
@@ -27,7 +26,7 @@ const router = createBrowserRouter(
         <Route path="preco" element={<Pricing />} />
         <Route path="login" element={<Login />} loader={loginLoader} action={loginAction} />
         <Route path="logout" action={logoutAction} />
-        <Route path="app" element={<AppLayout />} loader={appLoader}>
+        <Route path="app" lazy={() => import('@/layouts/app-layout')} loader={appLoader}>
           <Route index element={<Navigate to="cidades" replace />} />
           <Route path="cidades" element={<Cities />} />
           <Route path="cidades/:id" element={<TripDetails />} />

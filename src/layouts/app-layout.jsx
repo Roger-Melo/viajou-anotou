@@ -2,7 +2,7 @@ import { useNavigate, useLoaderData, useSearchParams, NavLink, Outlet, Form } fr
 import { useMap, useMapEvents, MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import { Logo } from '@/ui/logo'
 
-const AppLayout = () => {
+const Component = () => {
   const cities = useLoaderData()
   return (
     <main className="main-app-layout">
@@ -61,4 +61,6 @@ const Map = ({ cities }) => {
   )
 }
 
-export { AppLayout }
+Component.displayName = 'AppLayout'
+
+export { Component }
